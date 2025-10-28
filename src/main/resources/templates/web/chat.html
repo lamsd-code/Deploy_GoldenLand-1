@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Hỗ trợ trực tuyến • GoldenLand</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="user-id" th:content="${#authentication?.principal?.id}" />
+
+    <style>
+        /* =========================
+           GoldenLand Design System
+           ========================= */
+        :root{
+            --brand-50:#ecfdf5;
+            --brand-100:#d1fae5;
+            --brand-200:#a7f3d0;
+            --brand-300:#6ee7b7;
+            --brand-400:#34d399;
+            --brand-500:#10b981;   /* chủ đạo */
+            --brand-600:#059669;
+            --brand-700:#047857;
+            --brand-800:#065f46;
+            --ink:#0f172a;
+            --ink-soft:#334155;
+            --bg:#f6f9fc;
+            --panel:#ffffff;
+            --bubble-out:#0ea5e9;
+            --bubble-in:#ffffff;
+            --shadow:0 10px 30px rgba(2, 6, 23, .08);
+            --glass:rgba(255,255,255,.6);
+            --ring:0 0 0 3px rgba(16,185,129,.18);
+            --radius:22px;
+        }
+
+        /* Base */
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0;
+            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+            color:var(--ink);
+            background:
+                    radial-gradient(1000px 400px at 10% -20%, #cbffe6 0%, transparent 60%),
+                    radial-gradient(800px 300px at 110% 0%, #e8fff4 0%, transparent 60%),
+                    linear-gradient(180deg, #f7fafc, #eef7ff 40%, var(--bg));
+            background-attachment: fixed;
+        }
+
+        /* ====== Header / Brand Bar ====== */
+        header{
+            position:sticky; top:0; z-index:20;
+            height:76px;
+            display:flex; align-items:center; justify-content:center;
+            background:linear-gradient(90deg, var(--brand-600), var(--brand-500), #16c77e);
+            color:#fff;
+            box-shadow:0 12px 30px rgba(16,185,129,.22);
+        }
+        .bar{
+            width:100%;
+            max-width:1200px;
+            padding:0 18px;
+            display:grid; grid-template-columns: 1fr auto 1fr; align-items:center; gap:12px;
+        }
+        .brand{
+            justify-self:center;
+            display:flex; align-items:center; gap:14px;
+            user-select:none;
+        }
+        .brand .logo{
+            width:42px; height:42px; border-radius:12px;
+            background:linear-gradient(135deg, #fff, #d7ffee);
+            color:var(--brand-700);
+            display:grid; place-items:center;
+            font-weight:800; letter-spacing:.5px;
+            box-shadow:0 8px 24px rgba(0,0,0,.12), inset 0 0 0 2px rgba(16,185,129,.25);
+            transform:rotate(-8deg);
+            animation:pop 800ms cubic-bezier(.2,.8,.2,1) both;
+        }
+        .brand h1{
+            margin:0; font-size:22px; letter-spacing:.6px; font-weight:800;
+            display:flex; align-items:baseline; gap:10px;
+        }
+        .brand h1 .shine{
+            position:relative;
+            background:linear-gradient(90deg,#fff, #fef3c7, #ffffff);
+            -webkit-background-clip:text; background-clip:text; color:transparent;
+            animation:shine 5s linear infinite;
+            text-shadow:0 2px 12px rgba(255,255,255,.35);
+        }
+        .brand h1 span.sub{
+            font-size:12px; font-weight:700; opacity:.95;
+            padding:4px 8px; border-radius:999px;
+            background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);
+            backdrop-filter: blur(6px);
+        }
+
+        /* Right cluster */
+        .cluster{
+            justify-self:end;
+            display:flex; align-items:center; gap:8px;
+        }
+        #roomMeta{
+            white-space:nowrap;
+            font-size:13px; font-weight:700;
+            padding:8px 12px; border-radius:999px; color:#083344;
+            background:linear-gradient(180deg, #ffffff, #dcfce7);
+            border:1px solid rgba(15,118,110,.18);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 6px 16px rgba(0,0,0,.06);
+        }
+        .btn-exit{
+            display:none;
+            border:none; outline:0; cursor:pointer;
+            padding:10px 14px; border-radius:999px;
+            font-weight:800; letter-spacing:.2px;
+            color:#fff; background:linear-gradient(180deg, #ef4444, #dc2626);
+            box-shadow:0 10px 20px rgba(220,38,38,.28);
+            transition:transform .12s ease, box-shadow .2s ease, filter .2s ease;
+        }
+        .btn-exit:hover{ transform:translateY(-1px); filter:brightness(1.05) }
+        .btn-exit:active{ transform:translateY(0); box-shadow:0 6px 14px rgba(220,38,38,.32) }
+
+        /* ====== Layout ====== */
+        .wrap{max-width:1200px;margin:20px auto; padding:0 18px}
+        .chat{
+            display:grid; gap:18px;
+            grid-template-columns: minmax(0, 1fr) 340px;
+        }
+        @media (max-width: 980px){
+            .chat{ grid-template-columns: 1fr; }
+        }
+
+        /* Panels */
+        .pane{
+            background:var(--panel);
+            border-radius:var(--radius);
+            box-shadow: var(--shadow);
+            overflow:hidden;
+            position:relative;
+        }
+
+        /* ====== Messages ====== */
+        .msgs{
+            height:calc(68vh);
+            min-height:420px;
+            overflow:auto;
+            padding:22px 18px 10px;
+            scroll-behavior:smooth;
+            background:
+                    radial-gradient(800px 200px at 0% 0%, rgba(16,185,129,.08), transparent 60%),
+                    radial-gradient(500px 180px at 100% 20%, rgba(16,185,129,.05), transparent 60%);
+        }
+        .msgs::-webkit-scrollbar{ width:10px }
+        .msgs::-webkit-scrollbar-thumb{
+            background:linear-gradient(180deg,#d1fae5,#a7f3d0);
+            border-radius:16px; border:2px solid #fff;
+        }
+
+        .msg{
+            max-width:72%;
+            padding:10px 14px;
+            margin:10px 0;
+            border-radius:18px;
+            word-wrap:break-word;
+            position:relative;
+            animation:slideIn .18s ease-out both;
+        }
+        .them{
+            background:var(--bubble-in);
+            border:1px solid rgba(2,6,23,.06);
+            box-shadow:0 4px 12px rgba(2,6,23,.04);
+        }
+        .them::after{
+            content:""; position:absolute; left:-6px; bottom:0;
+            border:10px solid transparent; border-right-color:#fff; border-left:0; border-bottom:0;
+            filter:drop-shadow(0 0 0 rgba(0,0,0,.05));
+        }
+        .me{
+            margin-left:auto; color:#fff; background:linear-gradient(180deg, #38bdf8, #0ea5e9);
+            border-top-right-radius:8px;
+            box-shadow:0 8px 18px rgba(14,165,233,.25);
+        }
+        .me::after{
+            content:""; position:absolute; right:-6px; bottom:0;
+            border:10px solid transparent; border-left-color:#0ea5e9; border-right:0; border-bottom:0;
+        }
+        .sys{
+            text-align:center; margin:12px auto; color:#9a7b17;
+            padding:8px 12px; border-radius:12px; font-size:13px; max-width:86%;
+            border:1px dashed #f3d98c; background:#fffcee;
+        }
+
+        /* ====== Composer ====== */
+        .composer{
+            display:flex; gap:10px; align-items:center;
+            padding:12px; border-top:1px solid #eef2f6;
+            background:linear-gradient(180deg, #ffffff, #f8fafc);
+            position:sticky; bottom:0;
+        }
+        .composer input{
+            flex:1; min-height:44px; border-radius:999px; outline:none;
+            padding:12px 16px 12px 48px;
+            border:1px solid #e6ebf5;
+            background:#ffffff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>') 14px center no-repeat;
+            transition:border-color .2s, box-shadow .2s, transform .1s;
+        }
+        .composer input:focus{ border-color:var(--brand-500); box-shadow:var(--ring) }
+        .composer button{
+            min-width:64px; height:44px; border:none; cursor:pointer;
+            border-radius:999px; color:#fff; font-weight:800; letter-spacing:.2px;
+            background:linear-gradient(180deg, var(--brand-500), var(--brand-600));
+            box-shadow:0 12px 22px rgba(16,185,129,.28);
+            transition:transform .1s ease, box-shadow .2s ease, filter .2s ease;
+        }
+        .composer button:hover{ transform:translateY(-1px); filter:brightness(1.03) }
+        .composer button:active{ transform:translateY(0) }
+        .composer button:disabled,.composer input:disabled{ opacity:.6; cursor:not-allowed }
+
+        /* ====== Side Info ====== */
+        .side{
+            padding:16px;
+            display:grid; gap:12px;
+            background:
+                    linear-gradient(180deg,#ffffff, #fafffd);
+        }
+        .card{
+            border:1px solid #e8eef5; border-radius:16px; padding:14px;
+            background:#ffffffba; backdrop-filter: blur(6px);
+            box-shadow:0 8px 18px rgba(2,6,23,.05);
+            animation:floatIn .3s ease-out both;
+        }
+        .kv{ display:flex; justify-content:space-between; gap:12px; color:#64748b; font-size:14px }
+        .kv b{ color:var(--ink); }
+        #hint{ color:#64748b }
+
+        /* ====== Animations ====== */
+        @keyframes shine{
+            0%{background-position:0% 50%}
+            100%{background-position:200% 50%}
+        }
+        @keyframes pop{ 0%{transform:scale(.7) rotate(-12deg); opacity:0} 100%{transform:scale(1) rotate(-8deg); opacity:1} }
+        @keyframes slideIn{ from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)} }
+        @keyframes floatIn{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
+
+        /* ====== Responsive tweaks ====== */
+        @media (max-width:980px){
+            .bar{ grid-template-columns: 1fr auto; }
+            .brand{ justify-self:start }
+            .cluster{ justify-self:end }
+            .msgs{ height:62vh }
+        }
+        @media (max-width:560px){
+            header{height:72px}
+            .brand h1{font-size:18px}
+            .brand .logo{width:38px;height:38px}
+            #roomMeta{display:none} /* tiết kiệm diện tích trên mobile, vẫn có trong sidebar */
+            .msgs{ height:58vh; min-height:360px }
+            .composer{ padding:10px }
+            .side{ grid-template-columns:1fr }
+        }
+    </style>
+</head>
+
+<body>
+<!-- ===== Brand Bar ===== -->
+<header>
+    <div class="bar">
+        <div class="brand">
+            <div class="logo">GL</div>
+            <h1>
+                <span class="shine">GoldenLand</span>
+                <span class="sub">Live Support</span>
+            </h1>
+        </div>
+
+        <div class="cluster">
+            <div id="roomMeta">Chưa gán phòng</div>
+            <button id="exitBtn" class="btn-exit" title="Thoát phiên">Thoát</button>
+        </div>
+    </div>
+</header>
+
+<!-- ===== App ===== -->
+<div class="wrap">
+    <div class="chat">
+        <!-- Chat panel -->
+        <section class="pane">
+            <div id="messages" class="msgs"></div>
+
+            <form id="composer" class="composer" autocomplete="off">
+                <input id="text" type="text" placeholder="Nhập tin nhắn…" required />
+                <button type="submit" aria-label="Gửi">Gửi</button>
+            </form>
+        </section>
+
+        <!-- Side panel -->
+        <aside class="pane side">
+            <div class="card kv">Tôi (userId): <b id="meId">—</b></div>
+            <div class="card kv">Nhân viên: <b id="staffId">—</b></div>
+            <div class="card kv">Phòng (room): <b id="roomId">—</b></div>
+            <div class="card" id="hint">Khách tạo phòng, hệ thống sẽ gán nhân viên rảnh sớm nhất.</div>
+        </aside>
+    </div>
+</div>
+
+<!-- STOMP -->
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+<script>
+    (function () {
+        const WS_URL = (location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws";
+
+        // REST endpoints (giữ nguyên logic)
+        const API_WAIT_ROOM = "/api/chat/room/wait";                 // POST customerId
+        const API_ACTIVE_BY_STAFF = "/api/chat/room/active-by-staff";// GET  staffId
+        const API_STAFF_NEXT = "/api/chat/staff/next";               // POST staffId
+        const API_CLOSE_ROOM = "/api/chat/room/close";               // POST roomId
+        const API_CLOSE_AND_NEXT = "/api/chat/staff/close-and-next"; // POST staffId & roomId
+        const HOME_URL = "http://localhost:8092/trang-chu";
+
+        const userId = Number(document.querySelector('meta[name="user-id"]')?.content || 0);
+        const STAFF_IDS = [2,3,4]; // cấu hình demo / có thể lấy từ server
+        const isStaff = STAFF_IDS.includes(userId);
+
+        let roomId = null, staffId = null;
+        let stompClient = null, sub = null, pollTimer = null;
+
+        const $msgs = document.getElementById("messages");
+        const $txt  = document.getElementById("text");
+        const $form = document.getElementById("composer");
+        const $meId = document.getElementById("meId");
+        const $stId = document.getElementById("staffId");
+        const $rmId = document.getElementById("roomId");
+        const $meta = document.getElementById("roomMeta");
+        const $hint = document.getElementById("hint");
+        const $exit = document.getElementById("exitBtn");
+
+        $meId.textContent = userId || "—";
+
+        function setComposerEnabled(on){
+            $txt.disabled = !on;
+            $form.querySelector("button").disabled = !on;
+            $txt.placeholder = on ? "Nhập tin nhắn…" : "Đang chờ…";
+            if(on) { try { $txt.focus(); } catch(_){} }
+        }
+        function appendSys(t){
+            const d=document.createElement("div");
+            d.className="msg sys"; d.textContent=t;
+            $msgs.appendChild(d); $msgs.scrollTop=$msgs.scrollHeight;
+        }
+        function appendMsg(t,self=false){
+            const d=document.createElement("div");
+            d.className="msg "+(self?"me":"them"); d.textContent=t;
+            $msgs.appendChild(d); $msgs.scrollTop=$msgs.scrollHeight;
+        }
+        function updateExitVisibility(){ $exit.style.display = roomId ? "inline-block" : "none"; }
+        function setRoomMeta(){
+            $stId.textContent = staffId ?? "—";
+            $rmId.textContent = roomId ?? "—";
+            $meta.textContent  = roomId
+                ? `Phòng #${roomId}${staffId ? ` — nhân viên #${staffId}` : " — (đang chờ gán nhân viên)"}`
+                : "Chưa gán phòng";
+            updateExitVisibility();
+        }
+
+        let hasSubscribed = false;
+        function subscribeRoom(){
+            if (!stompClient || !stompClient.connected || !roomId) return;
+            if (hasSubscribed) return; // ✅ ngăn subscribe trùng
+            hasSubscribed = true;
+            if (sub) { sub.unsubscribe(); sub = null; }
+
+            const dest = `/topic/room.${roomId}`;
+            sub = stompClient.subscribe(dest, (frame) => {
+                try {
+                    const payload = JSON.parse(frame.body);
+                    // cập nhật staffId nếu có
+                    if (!staffId && payload.staffId) {
+                        staffId = payload.staffId;
+                        setRoomMeta();
+                    }
+                    appendMsg(payload.content || "", payload.senderId === userId);
+                } catch (e) {
+                    appendMsg(frame.body);
+                }
+            });
+
+            $hint.style.display = "none";
+            appendSys(`📡 Đang theo dõi phòng #${roomId}`);
+        }
+
+        // ===== CUSTOMER FLOW: upsert room (id = customerId ở backend) =====
+        async function customerFlow(){
+            try{
+                // 1️⃣ Gán roomId = customerId trước
+                roomId = userId;
+                setRoomMeta();
+
+                // 2️⃣ Subscribe NGAY để lắng nghe notify
+                subscribeRoom();
+
+                // 🔓 3️⃣ Cho phép chat luôn (đừng chờ API)
+                setComposerEnabled(true);
+                appendSys(`🎧 Đang chờ nhân viên tham gia...`);
+
+                // 4️⃣ Gọi API tạo phòng (nếu đã tồn tại cũng OK)
+                const res = await fetch(`${API_WAIT_ROOM}?customerId=${userId}`, { method:"POST" });
+                if (!res.ok) throw new Error("waitRoom fail");
+                const data = await res.json();
+
+                // cập nhật staffId nếu có
+                staffId = data.staffId;
+                setRoomMeta();
+            }catch(err){
+                console.warn("⚠️ Lỗi tạo phòng:", err);
+                appendSys("⚠️ Không tạo được phòng (sẽ thử lại khi nhân viên tham gia).");
+            }
+        }
+
+        // ===== STAFF FLOW =====
+        async function tryClaimNext(){
+            try{
+                const res = await fetch(`${API_STAFF_NEXT}?staffId=${userId}`, { method:"POST" });
+                if (res.status === 204) return false;
+                if (!res.ok) return false;
+                const data = await res.json();
+                roomId = data.roomId; staffId = userId;
+                setRoomMeta(); subscribeRoom(); setComposerEnabled(true);
+                return true;
+            }catch{ return false; }
+        }
+        async function staffFlow(){
+            try{
+                const res = await fetch(`${API_ACTIVE_BY_STAFF}?staffId=${userId}`);
+                if (res.status === 200){
+                    const data = await res.json();
+                    roomId = data.roomId; staffId = userId;
+                    setRoomMeta(); subscribeRoom(); setComposerEnabled(true);
+                    return;
+                }
+            }catch{}
+            appendSys("Đang chờ khách…");
+            setComposerEnabled(false);
+            pollTimer = setInterval(async ()=>{
+                const ok = await tryClaimNext();
+                if (ok && pollTimer){ clearInterval(pollTimer); pollTimer=null; }
+            }, 2500);
+        }
+
+        // ===== EXIT =====
+        $exit.addEventListener("click", async () => {
+            if (!roomId) return;
+            try{
+                if (isStaff){
+                    const res = await fetch(`${API_CLOSE_AND_NEXT}?staffId=${userId}&roomId=${roomId}`, { method:"POST" });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    if (sub) { sub.unsubscribe(); sub=null; }
+                    if (data.nextRoomId){
+                        roomId = data.nextRoomId; staffId = userId;
+                        setRoomMeta(); subscribeRoom(); setComposerEnabled(true);
+                        appendSys(`Đã chuyển sang phòng #${roomId}`);
+                    } else {
+                        window.location.href = HOME_URL;
+                    }
+                } else {
+                    await fetch(`${API_CLOSE_ROOM}?roomId=${roomId}`, { method:"POST" });
+                    window.location.href = HOME_URL;
+                }
+            }catch{
+                appendSys("Không thoát được phòng. Vui lòng thử lại.");
+            }
+        });
+
+        // ===== Connect STOMP =====
+        function connect(){
+            stompClient = new StompJs.Client({
+                brokerURL: WS_URL,
+                reconnectDelay: 3000,
+                onConnect: () => {
+                    appendSys("✅ Đã kết nối.");
+                    if (isStaff) staffFlow(); else customerFlow();
+                },
+                onWebSocketClose: () => appendSys("⚠️ Mất kết nối."),
+                onStompError: (f) => appendSys("STOMP error: " + f.headers["message"])
+            });
+            stompClient.activate();
+        }
+
+        // ===== Send =====
+        $form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const text = $txt.value.trim();
+            if (!text || !roomId || !stompClient || !stompClient.connected) return;
+            stompClient.publish({
+                destination: "/app/chat.send",
+                body: JSON.stringify({ senderId: userId, content: text, room: { id: roomId } }),
+                headers: { "content-type": "application/json" }
+            });
+            $txt.value = "";
+        });
+
+        connect();
+    })();
+</script>
+</body>
+</html>

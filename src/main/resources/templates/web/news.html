@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title layout:fragment="pageTitle">Tin tức | SkyLand</title>
+</head>
+
+<body>
+<main layout:fragment="content" class="page-wrapper">
+
+    <!-- 🧭 BREADCRUMB -->
+    <section class="intro text-center text-white"
+             style="background-image: url('https://bizweb.dktcdn.net/100/328/362/themes/894751/assets/bg_breadcrumb.png?1664350964800');
+                    background-size: cover; background-position: center; padding: 60px 0;">
+        <h1 class="fw-bold display-5">Tin tức</h1>
+        <ul class="list-inline mt-3 mb-0">
+            <li class="list-inline-item">
+                <a th:href="@{/trang-chu}" class="text-white text-decoration-none">Trang chủ</a>
+                <span class="mx-1">/</span>
+            </li>
+            <li class="list-inline-item text-white">Tin tức</li>
+        </ul>
+    </section>
+
+    <!-- 📰 DANH SÁCH TIN TỨC -->
+    <section class="news py-5">
+        <div class="container">
+            <div class="row g-4">
+
+                <!-- DANH SÁCH TIN -->
+                <div class="col-lg-8">
+                    <div class="list-group border-0">
+
+                        <!-- 1️⃣ Nguyễn Tất Thành -->
+                        <div class="list-group-item border-0 border-bottom pb-4 mb-4 d-flex flex-column flex-md-row">
+                            <img src="https://res.cloudinary.com/dnbxsm1mx/image/upload/v1761124303/nguyen-tat-thanh_lwnziu.png"
+                                 alt="Nguyễn Tất Thành"
+                                 class="rounded mb-3 mb-md-0 me-md-3"
+                                 style="width: 260px; height: 160px; object-fit: cover;"
+                                 onerror="this.src='/images/no-image.png'">
+                            <div>
+                                <h5 class="fw-bold mb-2 text-success">
+                                    <a href="#" class="text-decoration-none text-success">
+                                        Đường Nguyễn Tất Thành – Con đường được mong chờ nhất ở Sài Gòn được mở rộng gấp 3!
+                                    </a>
+                                </h5>
+                                <p class="text-muted small mb-3">
+                                    Việc mở rộng tuyến Nguyễn Tất Thành giúp kết nối Quận 4 – Quận 1 thuận tiện, hứa hẹn tạo cú hích lớn cho thị trường BĐS khu Nam.
+                                </p>
+                                <a href="#" class="btn btn-outline-success btn-sm">Chi tiết →</a>
+                            </div>
+                        </div>
+
+                        <!-- 2️⃣ Mở rộng Nhà Rồng - Khánh Hội -->
+                        <div class="list-group-item border-0 border-bottom pb-4 mb-4 d-flex flex-column flex-md-row">
+                            <img src="https://res.cloudinary.com/dnbxsm1mx/image/upload/v1761124303/mo-rong-duong_geod3i.jpg"
+                                 alt="Mở rộng đường Nguyễn Tất Thành"
+                                 class="rounded mb-3 mb-md-0 me-md-3"
+                                 style="width: 260px; height: 160px; object-fit: cover;"
+                                 onerror="this.src='/images/no-image.png'">
+                            <div>
+                                <h5 class="fw-bold mb-2 text-success">
+                                    <a href="#" class="text-decoration-none text-success">
+                                        TP.HCM mở rộng đường Nguyễn Tất Thành để làm dự án Khu phức hợp Nhà Rồng - Khánh Hội
+                                    </a>
+                                </h5>
+                                <p class="text-muted small mb-3">
+                                    TP.HCM đẩy mạnh phát triển khu vực Nhà Rồng – Khánh Hội, tạo trục giao thông hiện đại kết nối trung tâm với khu đô thị ven sông.
+                                </p>
+                                <a href="#" class="btn btn-outline-success btn-sm">Chi tiết →</a>
+                            </div>
+                        </div>
+
+                        <!-- 3️⃣ Quận 8 -->
+                        <div class="list-group-item border-0 border-bottom pb-4 mb-4 d-flex flex-column flex-md-row">
+                            <img src="https://res.cloudinary.com/dnbxsm1mx/image/upload/v1761124305/quan8_wgugib.png"
+                                 alt="Tiềm năng phát triển Quận 8"
+                                 class="rounded mb-3 mb-md-0 me-md-3"
+                                 style="width: 260px; height: 160px; object-fit: cover;"
+                                 onerror="this.src='/images/no-image.png'">
+                            <div>
+                                <h5 class="fw-bold mb-2 text-success">
+                                    <a href="#" class="text-decoration-none text-success">
+                                        Tiềm năng phát triển của Quận 8
+                                    </a>
+                                </h5>
+                                <p class="text-muted small mb-3">
+                                    Quận 8 giữ vị trí chiến lược kết nối khu Nam với trung tâm, hạ tầng được đầu tư mạnh giúp BĐS khu vực này tăng trưởng bền vững.
+                                </p>
+                                <a href="#" class="btn btn-outline-success btn-sm">Chi tiết →</a>
+                            </div>
+                        </div>
+
+                        <!-- 4️⃣ Cầu Bình Tiên -->
+                        <div class="list-group-item border-0 pb-4 mb-4 d-flex flex-column flex-md-row">
+                            <img src="https://res.cloudinary.com/dnbxsm1mx/image/upload/v1761124302/binh-tien_kpi0zr.jpg"
+                                 alt="Cầu Bình Tiên"
+                                 class="rounded mb-3 mb-md-0 me-md-3"
+                                 style="width: 260px; height: 160px; object-fit: cover;"
+                                 onerror="this.src='/images/no-image.png'">
+                            <div>
+                                <h5 class="fw-bold mb-2 text-success">
+                                    <a href="#" class="text-decoration-none text-success">
+                                        3.500 tỷ đồng xây dựng cầu Bình Tiên nối Q.5 – Q.6 – Q.8 – Q.7
+                                    </a>
+                                </h5>
+                                <p class="text-muted small mb-3">
+                                    Dự án cầu Bình Tiên giúp tăng khả năng kết nối khu Tây Nam và khu Nam TP.HCM, giảm ùn tắc và thúc đẩy phát triển khu đô thị mới.
+                                </p>
+                                <a href="#" class="btn btn-outline-success btn-sm">Chi tiết →</a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 🔸 SIDEBAR -->
+                <div class="col-lg-4">
+                    <div class="border rounded-3 p-3 shadow-sm mb-4">
+                        <h5 class="fw-bold text-success mb-3">Dự án nổi bật</h5>
+                        <ul class="list-unstyled small">
+                            <li class="mb-2"><a href="#" class="text-dark text-decoration-none">Dự án The Pegasuite 2</a></li>
+                            <li class="mb-2"><a href="#" class="text-dark text-decoration-none">Dự án CII Tower 152 Điện Biên Phủ</a></li>
+                            <li class="mb-2"><a href="#" class="text-dark text-decoration-none">Dự án Diamond Riverside</a></li>
+                            <li><a href="#" class="text-dark text-decoration-none">Dự án Akari City Nam Long</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="border rounded-3 p-3 shadow-sm text-center">
+                        <img src="https://res.cloudinary.com/dnbxsm1mx/image/upload/v1761124808/Logo-Golden-Land_szneyt.png"
+                             alt="SkyLand Group" class="img-fluid mb-3" style="max-width: 150px;">
+                        <p class="small text-muted mb-3">
+                            Trang thông tin tư vấn dự án của <b>Tập đoàn BĐS Golden Land</b>.  
+                            Cung cấp thông tin <b>chính xác – minh bạch – uy tín</b> đến khách hàng.
+                        </p>
+                        <p class="fw-bold text-danger mb-1">Hotline: 0906 435 491</p>
+                        <a href="tel:0906435491" class="btn btn-success btn-sm w-100">GỌI NGAY</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

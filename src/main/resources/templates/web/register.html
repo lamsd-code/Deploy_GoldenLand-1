@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title layout:fragment="pageTitle">Đăng ký tài khoản | SkyLand</title>
+
+    <style>
+        /* Card xanh lá đồng bộ với trang login */
+        .auth-card {
+            max-width: 520px;
+            margin: 64px auto;
+            background: #25b45b;           /* xanh chủ đạo */
+            color: #fff;
+            border-radius: 18px;
+            box-shadow: 0 12px 28px rgba(0,0,0,.12);
+            padding: 36px 32px 28px;
+        }
+        .auth-title {
+            font-weight: 800;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+        .auth-subtitle {
+            opacity: .85;
+            text-align: center;
+            margin-bottom: 22px;
+        }
+        .auth-form .form-label { color: #e9fff3; font-weight: 600; }
+        .auth-form .form-control {
+            background: #fff; border: none; border-radius: 10px;
+            padding: 12px 14px; box-shadow: 0 4px 10px rgba(0,0,0,.06) inset;
+        }
+        .auth-btn {
+            background:#fff; color:#1b9a4a; border:none;
+            width:100%; padding:12px; border-radius:10px; font-weight:700;
+            transition: transform .04s ease, box-shadow .2s ease;
+        }
+        .auth-btn:hover { box-shadow: 0 10px 18px rgba(0,0,0,.16); }
+        .auth-btn:active { transform: translateY(1px); }
+        .auth-footer {
+            text-align:center; opacity:.9; margin-top:12px;
+        }
+        .auth-footer a { color:#eafff5; font-weight:700; text-decoration: none; }
+        .auth-alert {
+            border: none; border-radius: 12px; padding: 10px 12px;
+            background: rgba(255,255,255,.18); color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+<main layout:fragment="content" class="page-wrapper">
+    <div class="auth-card">
+        <h3 class="auth-title">Đăng ký</h3>
+        <p class="auth-subtitle">Tạo tài khoản để sử dụng dịch vụ SkyLand</p>
+
+        <!-- Thông báo -->
+        <div th:if="${param.error}" class="auth-alert mb-3">
+            <span th:if="${param.error[0] == 'exists'}">Email hoặc tên đăng nhập đã tồn tại.</span>
+            <span th:if="${param.error[0] == 'confirm'}">Xác nhận mật khẩu không khớp.</span>
+            <span th:if="${param.error[0] == 'session'}">Phiên đăng ký đã hết hạn, vui lòng thử lại.</span>
+            <span th:if="${param.error[0] == 'missing'}">Vui lòng điền đủ thông tin bắt buộc.</span>
+        </div>
+        <div th:if="${param.success}" class="auth-alert mb-3">
+            🎉 Đăng ký thành công!
+        </div>
+
+        <form class="auth-form" th:action="@{/auth/register}" method="post" th:object="${form}">
+            <!-- Nếu vẫn bật CSRF thì để dòng này (vô hại khi tắt CSRF) -->
+            <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}"/>
+
+            <div class="mb-3">
+                <label class="form-label">Họ và tên</label>
+                <input th:field="*{fullName}" class="form-control" placeholder="Nguyễn Văn A" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Số điện thoại</label>
+                <input th:field="*{phone}" class="form-control" placeholder="09xx xxx xxx" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input th:field="*{email}" type="email" class="form-control" placeholder="email@domain.com" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tên đăng nhập</label>
+                <input th:field="*{username}" class="form-control" placeholder="username" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mật khẩu</label>
+                <input th:field="*{password}" type="password" class="form-control" placeholder="••••••••" required minlength="6">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Xác nhận mật khẩu</label>
+                <input th:field="*{confirmPassword}" type="password" class="form-control" placeholder="••••••••" required minlength="6">
+            </div>
+
+            <button class="auth-btn">Đăng ký</button>
+        </form>
+
+        <div class="auth-footer">
+            Đã có tài khoản? <a th:href="@{/login}">Đăng nhập</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

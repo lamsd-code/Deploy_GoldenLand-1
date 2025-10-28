@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <title layout:fragment="pageTitle">Bài đăng của tôi | SkyLand</title>
+    <style>
+        .status-pending { color: orange; font-weight: bold; }
+        .status-approved { color: green; font-weight: bold; }
+        .status-rejected { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+<main layout:fragment="content" class="container py-5">
+    <h2 class="mb-4">Bài đăng của tôi</h2>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Tên tòa nhà</th>
+            <th>Quận</th>
+            <th>Phường</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="b : ${posts}" th:id="'row-' + ${b.id}">
+            <td th:text="${b.name}">Tên tòa nhà</td>
+            <td th:text="${b.district}">Quận</td>
+            <td th:text="${b.ward}">Phường</td>
+            <td>
+                <span th:classappend="${b.status == 'PENDING' ? 'status-pending' :
+                                       (b.status == 'APPROVED' ? 'status-approved' :
+                                       (b.status == 'REJECTED' ? 'status-rejected' : ''))}"
+                      th:text="${b.status}">Trạng thái</span>
+            </td>
+            <td>
+                <a th:href="@{/web/building-edit/{id}(id=${b.id})}" class="btn btn-primary btn-sm">Sửa</a>
+                <button type="button" class="btn btn-danger btn-sm btn-delete" th:data-id="${b.id}">Xoá</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- ALERT -->
+    <div id="customAlertBackdrop"
+         style="display:none; position: fixed; inset:0; background: rgba(0,0,0,0.4); z-index: 999;"></div>
+    <div id="customAlert"
+         style="display:none; position: fixed; top:40%; left:50%; transform:translate(-50%,-50%);
+                background:white; padding:25px 35px; border-radius:8px; text-align:center;
+                box-shadow:0 3px 10px rgba(0,0,0,0.2); z-index: 1000;">
+        <span id="customAlertMessage"></span>
+        <button id="customAlertButton" class="btn btn-primary mt-3">OK</button>
+    </div>
+</main>
+
+<th:block layout:fragment="scripts">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:inline="javascript">
+        $(function () {
+            // 🟩 Hàm hiển thị alert đẹp
+            function customAlert(message, callback) {
+                $('#customAlertMessage').text(message);
+                $('#customAlertBackdrop, #customAlert').show();
+                $('#customAlertButton').off('click').on('click', function () {
+                    $('#customAlertBackdrop, #customAlert').hide();
+                    if (callback) callback();
+                });
+            }
+
+            // 🟥 Xoá bài đăng
+            $('.btn-delete').click(function () {
+                const id = $(this).data('id');
+                if (confirm('Bạn có chắc muốn xoá bài đăng này?')) {
+                    $.ajax({
+                        type: 'DELETE',
+                        url: '/web/building-delete/' + id,
+                        success: function () {
+                            customAlert('✅ Xoá bài đăng thành công!', function () {
+                                $('#row-' + id).remove();
+                            });
+                        },
+                        error: function (xhr) {
+                            customAlert('❌ Lỗi khi xoá (' + xhr.status + ')');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

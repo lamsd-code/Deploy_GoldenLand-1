@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:fragment="pageTitle"
+          th:text="'Chi tiết ' + ${building.name} + ' | SkyLand'">Chi tiết tòa nhà</title>
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+<main layout:fragment="content" class="page-wrapper">
+
+    <!-- 🏢 HEADER -->
+    <section class="intro text-center text-white"
+             style="background-image: url('https://bizweb.dktcdn.net/100/328/362/themes/894751/assets/bg_breadcrumb.png?1664350964800');
+                    background-size: cover; background-position: center; padding: 60px 0;">
+        <h1 class="fw-bold display-5" th:text="${building.name}">Tên tòa nhà</h1>
+        <ul class="list-inline mt-3 mb-0">
+            <li class="list-inline-item">
+                <a th:href="@{/trang-chu}" class="text-white text-decoration-none">Trang chủ</a>
+                <span class="mx-1">/</span>
+            </li>
+            <li class="list-inline-item">
+                <a th:href="@{/san-pham}" class="text-white text-decoration-none">Danh sách tòa nhà</a>
+                <span class="mx-1">/</span>
+            </li>
+            <li class="list-inline-item"><span class="text-light" th:text="${building.name}"></span></li>
+        </ul>
+    </section>
+
+    <!-- 🏙️ NỘI DUNG CHÍNH -->
+    <section class="py-5">
+        <div class="container">
+            <!-- ẢNH -->
+            <div class="text-center mb-4">
+                <img th:src="@{${building.avatar}}" class="img-fluid rounded shadow" alt="Ảnh tòa nhà"
+                     style="max-height: 450px; object-fit: cover;">
+            </div>
+
+            <!-- Thông tin chi tiết -->
+            <div class="row">
+                <div class="col-md-8">
+                    <h4 class="fw-bold text-success mb-3">Thông tin chi tiết</h4>
+                    <ul class="list-unstyled fs-6">
+                        <li><strong>📍 Địa chỉ:</strong> <span th:text="${building.street} + ', ' + ${building.ward} + ', ' + ${building.district}"></span></li>
+                        <li><strong>📐 Diện tích sàn:</strong> <span th:text="${building.floorArea}"></span> m²</li>
+                        <li><strong>💰 Giá thuê:</strong> <span th:text="${building.rentPrice}"></span> triệu/tháng</li>
+                        <li><strong>🧾 Phí dịch vụ:</strong> <span th:text="${building.serviceFee}"></span></li>
+                        <li><strong>🚗 Phí gửi xe:</strong> <span th:text="${building.carFee}"></span></li>
+                        <li><strong>🏢 Số tầng hầm:</strong> <span th:text="${building.numberOfBasement}"></span></li>
+                        <li><strong>🧭 Hướng:</strong> <span th:text="${building.direction}"></span></li>
+                        <li><strong>👤 Quản lý:</strong> <span th:text="${building.managerName}"></span> (<span th:text="${building.managerPhone}"></span>)</li>
+                        <li><strong>👁️ Lượt xem:</strong> <span th:text="${building.viewCount}"></span></li>
+                    </ul>
+
+                    <div class="mt-4">
+                        <h5 class="fw-bold text-success">Mô tả</h5>
+                        <p th:text="${building.description != null ? building.description : 'Chưa có mô tả chi tiết.'}"></p>
+                    </div>
+                    
+                    <!-- 💬 BÌNH LUẬN & ĐÁNH GIÁ -->
+                    <div class="mt-5">
+                        <h4 class="fw-bold text-success mb-3">💬 Đánh giá & Bình luận</h4>
+
+                        <!-- Form bình luận (chỉ khách hàng đã đăng nhập) -->
+                        <div th:if="${#authorization.expression('isAuthenticated()')}">
+				              <form id="reviewForm" class="mb-4">
+				                <input type="hidden" id="buildingId" th:value="${building.id}" />
+
+                                <div class="mb-3">
+                                    <label for="rating" class="form-label">Chọn số sao:</label>
+                                    <div id="ratingStars" class="rating-stars mb-2">
+									  <i class="fa-solid fa-star fs-4 text-secondary" data-value="1"></i>
+									  <i class="fa-solid fa-star fs-4 text-secondary" data-value="2"></i>
+									  <i class="fa-solid fa-star fs-4 text-secondary" data-value="3"></i>
+									  <i class="fa-solid fa-star fs-4 text-secondary" data-value="4"></i>
+									  <i class="fa-solid fa-star fs-4 text-secondary" data-value="5"></i>
+									</div>
+
+                                    <input type="hidden" id="ratingValue" value="0" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <textarea id="reviewContent" class="form-control" rows="3"
+                                              placeholder="Nhập nội dung bình luận..."></textarea>
+                                </div>
+
+                                <button type="button" id="submitReview" class="btn btn-success">
+                                    Gửi bình luận
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Nếu chưa đăng nhập -->
+			            <div th:if="${!#authorization.expression('isAuthenticated()')}" class="text-muted fst-italic">
+			              Vui lòng <a th:href="@{/login}" class="text-success fw-bold">đăng nhập</a> để bình luận.
+			            </div>
+
+                        <!-- Danh sách bình luận -->
+                        <div id="reviewList" class="mt-4 border-top pt-3">
+                            <div id="reviewsContainer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GOOGLE MAP -->
+                <div class="col-md-4">
+                    <h4 class="fw-bold text-success mb-3">📍 Vị trí trên bản đồ</h4>
+                    <iframe th:src="'https://www.google.com/maps?q=' + ${building.street} + ',' + ${building.district} + '&output=embed'"
+                            width="100%" height="350" style="border:0;" loading="lazy"></iframe>
+                </div>
+            </div>
+
+            <!-- TÒA NHÀ TƯƠNG TỰ -->
+            <div class="mt-5">
+                <h4 class="fw-bold text-success mb-4">🏗️ Tòa nhà tương tự</h4>
+                <div class="row g-4" th:if="${!#lists.isEmpty(related)}">
+                    <div class="col-md-3" th:each="r : ${related}">
+                        <div class="card h-100 shadow-sm border-0">
+                            <img th:src="@{${r.avatar}}" class="card-img-top" alt="Ảnh tòa nhà"
+                                 style="height: 180px; object-fit: cover;">
+                            <div class="card-body">
+                                <h6 class="fw-bold" th:text="${r.name}"></h6>
+                                <p class="small text-muted">
+                                    <i class="fa-solid fa-location-dot text-danger"></i>
+                                    <span th:text="${r.district}"></span>
+                                </p>
+                                <p class="small mb-2">
+                                    💰 <span th:text="${r.rentPrice}"></span> triệu/tháng
+                                </p>
+                                <a th:href="@{'/chi-tiet-toa-nha/' + ${r.id}}" class="btn btn-outline-success btn-sm w-100">
+                                    Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(related)}" class="text-muted fst-italic">Không có tòa nhà tương tự.</div>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+<th:block layout:fragment="scripts">
+
+<!-- 💬 JS Xử lý bình luận -->
+<script th:inline="javascript">
+document.addEventListener("DOMContentLoaded", function () {
+  const stars = document.querySelectorAll("#ratingStars i");
+  const ratingInput = document.getElementById("ratingValue");
+  const buildingId = document.getElementById("buildingId") ? document.getElementById("buildingId").value : null;
+  
+//✅ Lấy username hiện tại (nếu có)
+  const currentUser = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false 
+    ? /*[[${#authentication.principal?.username}]]*/ "" 
+    : null;
+
+  if (!buildingId) return;
+
+  // ⭐ Chọn sao
+  stars.forEach(star => {
+    star.addEventListener("click", function () {
+      const rating = this.getAttribute("data-value");
+      ratingInput.value = rating;
+      stars.forEach(s => s.classList.remove("active", "text-warning"));
+      for (let i = 0; i < rating; i++) stars[i].classList.add("active", "text-warning");
+    });
+  });
+
+
+//📦 Load danh sách bình luận
+  loadReviews();
+  function loadReviews() {
+    fetch(`/api/review/${buildingId}`)
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById("reviewsContainer");
+        container.innerHTML = "";
+        if (data.length === 0) {
+          container.innerHTML = "<p class='text-muted fst-italic'>Chưa có bình luận nào.</p>";
+        } else {
+        	data.forEach(r => {
+        		  const name = r.username || "Ẩn danh";
+        		  const canDelete = (r.username === currentUser); // ✅ chỉ người đăng nhập mới thấy nút xoá
+        		  const deleteBtn = canDelete
+        		    ? `<button class="btn btn-sm btn-outline-danger float-end" onclick="deleteReview(${r.id})">
+        		         <i class="fa-solid fa-trash"></i>
+        		       </button>`
+        		    : "";
+        		  container.innerHTML += `
+        		    <div class="mb-3 border-bottom pb-2">
+        		      <strong class="text-success">${name}</strong>
+        		      <span class="text-warning ms-2">${"⭐".repeat(r.rating)}</span>
+        		      ${deleteBtn}
+        		      <br>
+        		      <small class="text-muted">${new Date(r.createdDate).toLocaleString()}</small>
+        		      <p class="mt-1">${r.content}</p>
+        		    </div>`;
+        		});
+
+        }
+      });
+	}
+
+//🚀 Gửi bình luận
+  const submitBtn = document.getElementById("submitReview");
+  if (submitBtn) {
+    submitBtn.addEventListener("click", function () {
+      const rating = parseInt(ratingInput.value);
+      const content = document.getElementById("reviewContent").value.trim();
+      if (!content || rating === 0) {
+        alert("Vui lòng nhập nội dung và chọn số sao!");
+        return;
+      }
+
+      fetch("/api/review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ gửi cookie đăng nhập
+        body: JSON.stringify({ buildingId, content, rating })
+      })
+        .then(res => {
+          if (res.status === 401) {
+            alert("❌ Bạn cần đăng nhập để bình luận!");
+            return null;
+          }
+          return res.json();
+        })
+        .then(res => {
+          if (res?.message === "success") {
+            alert("✅ Đã gửi bình luận!");
+            document.getElementById("reviewContent").value = "";
+            ratingInput.value = 0;
+            stars.forEach(s => s.classList.remove("active", "text-warning"));
+            loadReviews();
+          } else if (res) {
+            alert(res.message || "❌ Lỗi khi gửi bình luận!");
+          }
+        });
+    });
+  }
+//🗑 Hàm xoá bình luận
+  function deleteReview(id) {
+    if (confirm("🗑 Bạn có chắc muốn xoá bình luận này không?")) {
+      fetch(`/api/review/${id}`, {
+        method: "DELETE",
+        credentials: "include"
+      })
+        .then(res => res.json())
+        .then(res => {
+          if (res.message === "success") {
+            alert("✅ Đã xoá bình luận!");
+            loadReviews();
+          } else {
+            alert(res.message || "❌ Lỗi khi xoá bình luận!");
+          }
+        });
+    }
+  }
+
+});
+//🗑 Hàm xoá bình luận — đặt NGOÀI document.addEventListener
+window.deleteReview = function (id) {
+  if (confirm("🗑 Bạn có chắc muốn xoá bình luận này không?")) {
+    fetch(`/api/review/${id}`, {
+      method: "DELETE",
+      credentials: "include" // ✅ gửi cookie đăng nhập
+    })
+      .then(res => res.json())
+      .then(res => {
+        if (res.message === "success") {
+          alert("✅ Đã xoá bình luận!");
+          // ✅ Sau khi xoá thành công, reload lại danh sách bình luận
+          if (typeof loadReviews === "function") loadReviews();
+        } else {
+          alert(res.message || "❌ Lỗi khi xoá bình luận!");
+        }
+      })
+      .catch(err => console.error("❌ Lỗi khi xoá bình luận:", err));
+  }
+};
+
+
+</script>
+<!-- Nút Zalo nổi -->
+<a href="https://zalo.me/0896980501" target="_blank" id="zaloButton" title="Liên hệ qua Zalo">
+    <img th:src="@{/images/zalo-icon.png}" alt="Zalo">
+</a>
+
+<style>
+.rating-stars { display: flex; gap: 6px; font-size: 26px; cursor: pointer; }
+.rating-stars i { color: #ccc; transition: color 0.2s, transform 0.2s; }
+.rating-stars i:hover { transform: scale(1.2); }
+.rating-stars i.active { color: gold; }
+#zaloButton {
+  position: fixed;
+  bottom: 80px;
+  right: 25px;
+  z-index: 1000;
+  background: white;
+  border: 2px solid #198754;
+  border-radius: 50%;
+  width: 55px;
+  height: 55px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+  transition: transform 0.2s;
+}
+#zaloButton:hover { transform: scale(1.1); }
+#zaloButton img { width: 38px; height: 38px; }
+</style>
+</th:block>
+</body>
+</html>
